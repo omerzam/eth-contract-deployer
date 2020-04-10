@@ -1,0 +1,23 @@
+{
+  "name": "eth-contract-deployer",
+  "version": "1.0.0",
+  "description": "deploy ethereum contracts and execute after deployment functions with ease",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/omerzam/eth-contract-deployer.git"
+  },
+  "keywords": [
+    "ethereum",
+    "deploy"
+  ],
+  "author": "Omer Z.",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/omerzam/eth-contract-deployer/issues"
+  },
+  "homepage": "https://github.com/omerzam/eth-contract-deployer#readme"
+}
