@@ -1,3 +1,12 @@
+/**
+ * wrapper module to deploy contracts as well as prepare and send transactions to the blockchain
+ * using this wrapper you can deploy multiple contracts and perform transactions with the new contracts easly
+ *
+ * TODO: move to typescript
+ * TODO: add tests
+ * TODO: get config values from env vars
+ */
+
 const fs = require("fs");
 const Web3 = require("web3");
 
@@ -9,6 +18,9 @@ let min_gas_limit = 100000;
 let account;
 let gasPrice;
 
+/**
+ * @param  {string} message
+ */
 async function scan(message) {
   process.stdout.write(message);
   return await new Promise(function (resolve, reject) {
@@ -20,6 +32,9 @@ async function scan(message) {
   });
 }
 
+/**
+ * @param  {object} web3
+ */
 async function getGasPrice(web3) {
   while (true) {
     const nodeGasPrice = await web3.eth.getGasPrice();
@@ -30,6 +45,9 @@ async function getGasPrice(web3) {
   }
 }
 
+/**
+ * @param  {*} web3
+ */
 async function getTransactionReceipt(web3) {
   while (true) {
     const hash = await scan("Enter transaction-hash or leave empty to retry: ");
@@ -45,6 +63,15 @@ async function getTransactionReceipt(web3) {
   }
 }
 
+/**
+ * prepares, sign and sends the transaction to the node
+ *
+ * @param {*} web3
+ * @param {*} account
+ * @param {*} minGasLimit
+ * @param {*} transaction
+ * @param {*} value
+ */
 async function send(web3, account, minGasLimit, transaction, value = 0) {
   gasPrice = gasPrice || (await getGasPrice(web3));
   while (true) {
@@ -68,29 +95,63 @@ async function send(web3, account, minGasLimit, transaction, value = 0) {
   }
 }
 
+/**
+ * deploy contract
+ *
+ * @param {*} contractName
+ * @param {*} contractArgs
+ */
 const deploy = async (contractName, contractArgs) => {
+  // read contract abi and binary from the artifacts dir
   const abi = fs.readFileSync(artifacts_dir + contractName + ".abi", { encoding: "utf8" });
   const bin = fs.readFileSync(artifacts_dir + contractName + ".bin", { encoding: "utf8" });
 
+  // instantiate contract
   const contract = new web3.eth.Contract(JSON.parse(abi));
+
+  // prepare object for contract deployment
   const options = { data: "0x" + bin, arguments: contractArgs };
 
+  // prepare contract deployment transaction
   const transaction = contract.deploy(options);
+
+  // send transaction to blockchain
   const receipt = await send(web3, account, min_gas_limit, transaction);
   console.log(`${contractName} deployed at ${receipt.contractAddress}`);
+
+  // return contract instance
   return deployed(web3, contractName, receipt.contractAddress);
 };
 
+/**
+ * create contract instance after contract deployment
+ *
+ * @param {*} web3
+ * @param {*} contractName
+ * @param {*} contractAddr
+ */
 function deployed(web3, contractName, contractAddr) {
+  // read abi from path
   const abi = fs.readFileSync(artifacts_dir + contractName + ".abi", { encoding: "utf8" });
+  // instantiate contract
   return new web3.eth.Contract(JSON.parse(abi), contractAddr);
 }
 
-const execute = async (transaction, ...args) => {
+/**
+ * send transaction to blockchain
+ *
+ * @param {*} transaction
+ */
+const execute = async (transaction) => {
   const receipt = await send(web3, account, min_gas_limit, transaction);
   return receipt;
 };
 
+/**
+ * module configuration
+ *
+ * @param {*} options
+ */
 const config = (options) => {
   (node_address = options.node_address), (artifacts_dir = options.artifacts_dir), (private_key = options.private_key);
   min_gas_limit = options.min_gas_limit ? options.min_gas_limit : 100000;

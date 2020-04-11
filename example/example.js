@@ -1,3 +1,10 @@
+/**
+ * example of using the module to prepare a script to deploy a bancor smart token
+ * the script deploys the bancor smart token and deploys a converter contract for the smart token
+ * as well as deploys a new ERC20 token and add it as a reserve to the converter
+ * finally, the script runs a conversion between both tokens to test if the whole thing worked
+ */
+
 const Web3 = require("web3");
 const ethDeployer = require("../");
 
@@ -56,7 +63,11 @@ async function run() {
   console.log("reserve balance", web3.utils.fromWei(await reserveToken.methods.balanceOf(account.address).call()));
 }
 
-run().catch((error) => {
-  console.log(error);
-  process.exit(1);
-});
+run()
+  .then((t) => {
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.log(error);
+    process.exit(1);
+  });
