@@ -8,9 +8,6 @@ let web3;
 let min_gas_limit = 100000;
 let account;
 let gasPrice;
-// const CONTRACT_NAME = process.argv[4];
-// const CONTRACT_ARGS = process.argv.slice(5);
-// let config = null;
 
 async function scan(message) {
   process.stdout.write(message);
@@ -50,8 +47,6 @@ async function getTransactionReceipt(web3) {
 
 async function send(web3, account, minGasLimit, transaction, value = 0) {
   gasPrice = gasPrice || (await getGasPrice(web3));
-
-  //   const account = web3.eth.accounts.privateKeyToAccount(PRIVATE_KEY);
   while (true) {
     try {
       const options = {
@@ -61,7 +56,6 @@ async function send(web3, account, minGasLimit, transaction, value = 0) {
         gasPrice: gasPrice ? gasPrice : await getGasPrice(web3),
         value: value,
       };
-      console.log("testtttt");
 
       const signed = await web3.eth.accounts.signTransaction(options, account.privateKey);
       const receipt = await web3.eth.sendSignedTransaction(signed.rawTransaction);
@@ -74,7 +68,7 @@ async function send(web3, account, minGasLimit, transaction, value = 0) {
   }
 }
 
-const deploy = async (gasPrice, contractName, contractArgs) => {
+const deploy = async (contractName, contractArgs) => {
   const abi = fs.readFileSync(artifacts_dir + contractName + ".abi", { encoding: "utf8" });
   const bin = fs.readFileSync(artifacts_dir + contractName + ".bin", { encoding: "utf8" });
 
@@ -83,7 +77,6 @@ const deploy = async (gasPrice, contractName, contractArgs) => {
 
   const transaction = contract.deploy(options);
   const receipt = await send(web3, account, min_gas_limit, transaction);
-  //   const args = transaction.encodeABI().slice(options.data.length);
   console.log(`${contractName} deployed at ${receipt.contractAddress}`);
   return deployed(web3, contractName, receipt.contractAddress);
 };
