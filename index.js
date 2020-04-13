@@ -148,6 +148,19 @@ const execute = async (transaction) => {
 };
 
 /**
+ * get instance of existing contract
+ * 
+ * @param {*} contractName 
+ * @param {*} contractAddr 
+ */
+const getInstance = (contractName, contractAddr) => {
+  const abi = fs.readFileSync(artifacts_dir + contractName + ".abi", { encoding: "utf8" });
+  return new web3.eth.Contract(JSON.parse(abi), contractAddr);
+};
+
+
+
+/**
  * module configuration
  *
  * @param {*} options
@@ -163,4 +176,5 @@ module.exports = {
   config,
   deploy,
   execute,
+  getInstance
 };
