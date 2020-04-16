@@ -88,7 +88,6 @@ async function send(web3, account, minGasLimit, transaction, value = 0) {
       const receipt = await web3.eth.sendSignedTransaction(signed.rawTransaction);
       return receipt;
     } catch (error) {
-      console.log(error.message);
       const receipt = await getTransactionReceipt(web3);
       if (receipt) return receipt;
     }
@@ -149,16 +148,22 @@ const execute = async (transaction) => {
 
 /**
  * get instance of existing contract
- * 
- * @param {*} contractName 
- * @param {*} contractAddr 
+ *
+ * @param {*} contractName
+ * @param {*} contractAddr
  */
 const getInstance = (contractName, contractAddr) => {
   const abi = fs.readFileSync(artifacts_dir + contractName + ".abi", { encoding: "utf8" });
   return new web3.eth.Contract(JSON.parse(abi), contractAddr);
 };
 
-
+/**
+ * Get account by private key
+ */
+const getAccount = () => {
+  const account = web3.eth.accounts.privateKeyToAccount(private_key);
+  return account;
+};
 
 /**
  * module configuration
@@ -176,5 +181,6 @@ module.exports = {
   config,
   deploy,
   execute,
-  getInstance
+  getInstance,
+  getAccount,
 };
