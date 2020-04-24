@@ -1,6 +1,6 @@
 {
   "name": "eth-contract-deployer",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "deploy ethereum contracts and execute after deployment functions with ease",
   "main": "index.js",
   "scripts": {
