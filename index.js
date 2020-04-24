@@ -166,6 +166,13 @@ const getAccount = () => {
 };
 
 /**
+ * Get account by private key
+ */
+const getWeb3 = () => {
+  return web3;
+};
+
+/**
  * module configuration
  *
  * @param {*} options
@@ -183,4 +190,5 @@ module.exports = {
   execute,
   getInstance,
   getAccount,
+  getWeb3,
 };
