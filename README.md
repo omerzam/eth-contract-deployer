@@ -28,57 +28,51 @@ const ethDeployer = require("eth-contract-deployer");
 
 configure eth-contract-deployer 
 ```javascript
-// config object for eth deployer
-  const config = {
-    node_address: 'http://127.0.0.1:8545', // node address
-    artifacts_dir: '/path/to/artifacts/dir', // path to contracts artifacts (abi/bin files)
-    private_key: '0x000...', // private key
-  };
+const config = {
+  node_address: 'http://127.0.0.1:8545', // node address
+  artifacts_dir: '/path/to/artifacts/dir', // path to contracts artifacts (abi/bin files)
+  private_key: '0x000...', // private key
+};
 
-  // configure eth deployer
-  ethDeployer.config(config);
+ethDeployer.config(config);
 ```
 
 ### Deploy a contract
-the deploy function needs 2 arguments, 
+deploy() needs 2 arguments, 
 * contract name - the contract abi filename as it is on the artifacts dir provided
 * constructor arguments - an array containing the values needed for the contract constructor 
   
 ```javascript
-// deploy some contract
-  const token = await ethDeployer.deploy("ContractName", ["value1", "value2", 'value3']);
+const token = await ethDeployer.deploy("ContractName", ["value1", "value2", 'value3']);
 
 ```
 
 ### Get contract instance
-getInstance needs 2 arguments
+getInstance() needs 2 arguments
 * contract name - the contract abi filename as it is on the artifacts dir provided
-* contract address - the address of the existing contract
+* contract address - the contract address
 ```javascript
 const contractInstance = ethDeployer.getInstance("ContractName", "0x000...");
 ```
 
 ### Execute a transaction
-execute needs just one argument, a transaction object
+execute() needs just one argument, a transaction object
 ```javascript
-// execute transaction
-  const tx = token.methods.transfer("0x000...", "10000000000000000000000");
-  await ethDeployer.execute(tx);
+const tx = token.methods.transfer("0x000...", "10000000000000000000000");
+await ethDeployer.execute(tx);
 ```
 
 ### Get account
 get account object
 ```javascript
-// get self address
-  const account = ethDeployer.getAccount();
-  account.address // public address
+const account = ethDeployer.getAccount();
+console.log(account.address); // public address
 ```
 
 ### Get web3 instance
-get a web3 instance
+get the web3 instance
 ```javascript
-// get web3 instance
-  const web3 = ethDeployer.getWeb3Instance();
+const web3 = ethDeployer.getWeb3Instance();
 ```
 
 ### example of using the module to prepare a deploy script for a bancor smart token:
