@@ -7,58 +7,58 @@
  * TODO: get config values from env vars
  */
 
-const fs = require("fs");
-const Web3 = require("web3");
+const fs = require('fs')
+const Web3 = require('web3')
 
-let node_address = "";
-let private_key = "";
-let artifacts_dir = "";
-let web3;
-let min_gas_limit = 100000;
-let account;
-let gasPrice;
+let node_address = ''
+let private_key = ''
+let artifacts_dir = ''
+let web3
+let min_gas_limit = 100000
+let account
+let gasPrice
 
 /**
  * @param  {string} message
  */
-async function scan(message) {
-  process.stdout.write(message);
+async function scan (message) {
+  process.stdout.write(message)
   return await new Promise(function (resolve, reject) {
-    process.stdin.resume();
-    process.stdin.once("data", function (data) {
-      process.stdin.pause();
-      resolve(data.toString().trim());
-    });
-  });
+    process.stdin.resume()
+    process.stdin.once('data', function (data) {
+      process.stdin.pause()
+      resolve(data.toString().trim())
+    })
+  })
 }
 
 /**
  * @param  {object} web3
  */
-async function getGasPrice(web3) {
+async function getGasPrice (web3) {
   while (true) {
-    const nodeGasPrice = await web3.eth.getGasPrice();
-    const userGasPrice = await scan(`Enter gas-price or leave empty to use ${nodeGasPrice}: `);
-    if (/^\d+$/.test(userGasPrice)) return userGasPrice;
-    if (userGasPrice == "") return nodeGasPrice;
-    console.log("Illegal gas-price");
+    const nodeGasPrice = await web3.eth.getGasPrice()
+    const userGasPrice = await scan(`Enter gas-price or leave empty to use ${nodeGasPrice}: `)
+    if (/^\d+$/.test(userGasPrice)) return userGasPrice
+    if (userGasPrice == '') return nodeGasPrice
+    console.log('Illegal gas-price')
   }
 }
 
 /**
  * @param  {*} web3
  */
-async function getTransactionReceipt(web3) {
+async function getTransactionReceipt (web3) {
   while (true) {
-    const hash = await scan("Enter transaction-hash or leave empty to retry: ");
+    const hash = await scan('Enter transaction-hash or leave empty to retry: ')
     if (/^0x([0-9A-Fa-f]{64})$/.test(hash)) {
-      const receipt = await web3.eth.getTransactionReceipt(hash);
-      if (receipt) return receipt;
-      console.log("Invalid transaction-hash");
+      const receipt = await web3.eth.getTransactionReceipt(hash)
+      if (receipt) return receipt
+      console.log('Invalid transaction-hash')
     } else if (hash) {
-      console.log("Illegal transaction-hash");
+      console.log('Illegal transaction-hash')
     } else {
-      return null;
+      return null
     }
   }
 }
@@ -72,24 +72,24 @@ async function getTransactionReceipt(web3) {
  * @param {*} transaction
  * @param {*} value
  */
-async function send(web3, account, minGasLimit, transaction, value = 0) {
-  gasPrice = gasPrice || (await getGasPrice(web3));
+async function send (web3, account, minGasLimit, transaction, value = 0) {
+  gasPrice = gasPrice || (await getGasPrice(web3))
   while (true) {
     try {
       const options = {
         to: transaction._parent._address,
         data: transaction.encodeABI(),
         gas: Math.max(await transaction.estimateGas({ from: account.address }), minGasLimit),
-        gasPrice: gasPrice ? gasPrice : await getGasPrice(web3),
-        value: value,
-      };
+        gasPrice: gasPrice || await getGasPrice(web3),
+        value: value
+      }
 
-      const signed = await web3.eth.accounts.signTransaction(options, account.privateKey);
-      const receipt = await web3.eth.sendSignedTransaction(signed.rawTransaction);
-      return receipt;
+      const signed = await web3.eth.accounts.signTransaction(options, account.privateKey)
+      const receipt = await web3.eth.sendSignedTransaction(signed.rawTransaction)
+      return receipt
     } catch (error) {
-      const receipt = await getTransactionReceipt(web3);
-      if (receipt) return receipt;
+      const receipt = await getTransactionReceipt(web3)
+      if (receipt) return receipt
     }
   }
 }
@@ -106,21 +106,21 @@ const deploy = async (contractName, contractArgs) => {
   const bin = getContractData(artifacts_dir, contractName, 'bin')
 
   // instantiate contract
-  const contract = new web3.eth.Contract(abi);
+  const contract = new web3.eth.Contract(abi)
 
   // prepare object for contract deployment
-  const options = { data: "0x" + bin, arguments: contractArgs };
+  const options = { data: '0x' + bin, arguments: contractArgs }
 
   // prepare contract deployment transaction
-  const transaction = contract.deploy(options);
+  const transaction = contract.deploy(options)
 
   // send transaction to blockchain
-  const receipt = await send(web3, account, min_gas_limit, transaction);
-  console.log(`${contractName} deployed at ${receipt.contractAddress}`);
+  const receipt = await send(web3, account, min_gas_limit, transaction)
+  console.log(`${contractName} deployed at ${receipt.contractAddress}`)
 
   // return contract instance
-  return deployed(web3, contractName, receipt.contractAddress);
-};
+  return deployed(web3, contractName, receipt.contractAddress)
+}
 
 /**
  * create contract instance after contract deployment
@@ -129,11 +129,11 @@ const deploy = async (contractName, contractArgs) => {
  * @param {*} contractName
  * @param {*} contractAddr
  */
-function deployed(web3, contractName, contractAddr) {
+function deployed (web3, contractName, contractAddr) {
   // read abi from path
   const abi = getContractData(artifacts_dir, contractName, 'abi')
   // instantiate contract
-  return new web3.eth.Contract(abi, contractAddr);
+  return new web3.eth.Contract(abi, contractAddr)
 }
 
 /**
@@ -142,9 +142,9 @@ function deployed(web3, contractName, contractAddr) {
  * @param {*} transaction
  */
 const execute = async (transaction) => {
-  const receipt = await send(web3, account, min_gas_limit, transaction);
-  return receipt;
-};
+  const receipt = await send(web3, account, min_gas_limit, transaction)
+  return receipt
+}
 
 /**
  * get instance of existing contract
@@ -154,23 +154,23 @@ const execute = async (transaction) => {
  */
 const getInstance = (contractName, contractAddr) => {
   const abi = getContractData(artifacts_dir, contractName, 'abi')
-  return new web3.eth.Contract(abi, contractAddr);
-};
+  return new web3.eth.Contract(abi, contractAddr)
+}
 
 /**
  * Get account by private key
  */
 const getAccount = () => {
-  const account = web3.eth.accounts.privateKeyToAccount(private_key);
-  return account;
-};
+  const account = web3.eth.accounts.privateKeyToAccount(private_key)
+  return account
+}
 
 /**
  * Get account by private key
  */
 const getWeb3 = () => {
-  return web3;
-};
+  return web3
+}
 
 /**
  * module configuration
@@ -178,27 +178,27 @@ const getWeb3 = () => {
  * @param {*} options
  */
 const config = (options) => {
-  (node_address = options.node_address), (artifacts_dir = options.artifacts_dir), (private_key = options.private_key);
-  min_gas_limit = options.min_gas_limit ? options.min_gas_limit : 100000;
-  web3 = new Web3(node_address);
-  account = web3.eth.accounts.privateKeyToAccount(private_key);
-};
+  (node_address = options.node_address), (artifacts_dir = options.artifacts_dir), (private_key = options.private_key)
+  min_gas_limit = options.min_gas_limit ? options.min_gas_limit : 100000
+  web3 = new Web3(node_address)
+  account = web3.eth.accounts.privateKeyToAccount(private_key)
+}
 
 const getContractData = (dir, contractName, type) => {
   let contractData = null
   try {
     // console.log('artifacts_dir + contractName + "." + type', artifacts_dir + contractName + "." + type);
-    contractData = fs.readFileSync(artifacts_dir + contractName + "." + type, { encoding: "utf8" });
+    contractData = fs.readFileSync(artifacts_dir + contractName + '.' + type, { encoding: 'utf8' })
     contractData = type === 'abi' ? JSON.parse(contractData) : contractData
     // console.log('contractData', contractData);
   } catch (error) {
-    console.log(`failed to read ${type} file trying json`);
+    console.log(`failed to read ${type} file trying json`)
   }
 
   if (!contractData) {
     try {
-      const contract = fs.readFileSync(artifacts_dir + contractName + ".json", { encoding: "utf8" });
-      contractData = JSON.parse(contract)[type];
+      const contract = fs.readFileSync(artifacts_dir + contractName + '.json', { encoding: 'utf8' })
+      contractData = JSON.parse(contract)[type]
     } catch (error) {
       throw new Error(`Failed to get ${type} for contract ${contractName}`)
     }
@@ -213,5 +213,5 @@ module.exports = {
   execute,
   getInstance,
   getAccount,
-  getWeb3,
-};
+  getWeb3
+}
