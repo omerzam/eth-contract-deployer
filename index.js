@@ -102,11 +102,11 @@ async function send(web3, account, minGasLimit, transaction, value = 0) {
  */
 const deploy = async (contractName, contractArgs) => {
   // read contract abi and binary from the artifacts dir
-  const abi = fs.readFileSync(artifacts_dir + contractName + ".abi", { encoding: "utf8" });
-  const bin = fs.readFileSync(artifacts_dir + contractName + ".bin", { encoding: "utf8" });
+  const abi = getContractData(artifacts_dir, contractName, 'abi')
+  const bin = getContractData(artifacts_dir, contractName, 'bin')
 
   // instantiate contract
-  const contract = new web3.eth.Contract(JSON.parse(abi));
+  const contract = new web3.eth.Contract(abi);
 
   // prepare object for contract deployment
   const options = { data: "0x" + bin, arguments: contractArgs };
@@ -131,9 +131,9 @@ const deploy = async (contractName, contractArgs) => {
  */
 function deployed(web3, contractName, contractAddr) {
   // read abi from path
-  const abi = fs.readFileSync(artifacts_dir + contractName + ".abi", { encoding: "utf8" });
+  const abi = getContractData(artifacts_dir, contractName, 'abi')
   // instantiate contract
-  return new web3.eth.Contract(JSON.parse(abi), contractAddr);
+  return new web3.eth.Contract(abi, contractAddr);
 }
 
 /**
@@ -153,8 +153,8 @@ const execute = async (transaction) => {
  * @param {*} contractAddr
  */
 const getInstance = (contractName, contractAddr) => {
-  const abi = fs.readFileSync(artifacts_dir + contractName + ".abi", { encoding: "utf8" });
-  return new web3.eth.Contract(JSON.parse(abi), contractAddr);
+  const abi = getContractData(artifacts_dir, contractName, 'abi')
+  return new web3.eth.Contract(abi, contractAddr);
 };
 
 /**
@@ -183,6 +183,29 @@ const config = (options) => {
   web3 = new Web3(node_address);
   account = web3.eth.accounts.privateKeyToAccount(private_key);
 };
+
+const getContractData = (dir, contractName, type) => {
+  let contractData = null
+  try {
+    // console.log('artifacts_dir + contractName + "." + type', artifacts_dir + contractName + "." + type);
+    contractData = fs.readFileSync(artifacts_dir + contractName + "." + type, { encoding: "utf8" });
+    contractData = type === 'abi' ? JSON.parse(contractData) : contractData
+    // console.log('contractData', contractData);
+  } catch (error) {
+    console.log(`failed to read ${type} file trying json`);
+  }
+
+  if (!contractData) {
+    try {
+      const contract = fs.readFileSync(artifacts_dir + contractName + ".json", { encoding: "utf8" });
+      contractData = JSON.parse(contract)[type];
+    } catch (error) {
+      throw new Error(`Failed to get ${type} for contract ${contractName}`)
+    }
+  }
+
+  return contractData
+}
 
 module.exports = {
   config,
