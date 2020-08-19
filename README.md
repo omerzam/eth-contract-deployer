@@ -161,6 +161,6 @@ run()
 
 ## Meta
 
-Your Name – [@ozam15](https://twitter.com/ozam15) – omer@seedbed.io
+[@ozam15](https://twitter.com/ozam15) – omer@seedbed.io
 
 [https://github.com/omerzam/eth-contract-deployer](https://github.com/omerzam/eth-contract-deployer)

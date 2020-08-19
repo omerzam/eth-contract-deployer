@@ -4,7 +4,9 @@
   "description": "deploy ethereum contracts and execute after deployment functions with ease",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "./node_modules/standard/bin/cmd.js",
+    "lint:fix": "./node_modules/standard/bin/cmd.js --fix",
+    "test": "npm run lint && echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
@@ -12,7 +14,12 @@
   },
   "keywords": [
     "ethereum",
-    "deploy"
+    "deploy",
+    "contract",
+    "web3",
+    "blockchain",
+    "solidity",
+    "smart contracts"
   ],
   "author": "Omer Z.",
   "license": "ISC",
@@ -22,5 +29,8 @@
   "homepage": "https://github.com/omerzam/eth-contract-deployer#readme",
   "dependencies": {
     "web3": "^1.2.6"
+  },
+  "devDependencies": {
+    "standard": "^14.3.4"
   }
 }
