@@ -14,9 +14,9 @@ const NODE_ADDRESS = ''
 async function run () {
   // config object for eth deployer
   const config = {
-    node_address: NODE_ADDRESS, // node address
-    artifacts_dir: ARTIFACTS_DIR, // path to contracts artifacts
-    private_key: PRIVATE_KEY // private key
+    nodeAddress: NODE_ADDRESS, // node address
+    artifactsDir: ARTIFACTS_DIR, // path to contracts artifacts
+    privateKey: PRIVATE_KEY // private key
   }
 
   // configure eth deployer
