@@ -10,9 +10,9 @@
 const fs = require('fs')
 const Web3 = require('web3')
 
-let node_address = ''
-let private_key = ''
-let artifacts_dir = ''
+let nodeAddress = ''
+let privateKey = ''
+let artifactsDir = ''
 let web3
 let min_gas_limit = 100000
 let account
@@ -40,7 +40,7 @@ async function getGasPrice (web3) {
     const nodeGasPrice = await web3.eth.getGasPrice()
     const userGasPrice = await scan(`Enter gas-price or leave empty to use ${nodeGasPrice}: `)
     if (/^\d+$/.test(userGasPrice)) return userGasPrice
-    if (userGasPrice == '') return nodeGasPrice
+    if (userGasPrice === '') return nodeGasPrice
     console.log('Illegal gas-price')
   }
 }
@@ -102,8 +102,8 @@ async function send (web3, account, minGasLimit, transaction, value = 0) {
  */
 const deploy = async (contractName, contractArgs) => {
   // read contract abi and binary from the artifacts dir
-  const abi = getContractData(artifacts_dir, contractName, 'abi')
-  const bin = getContractData(artifacts_dir, contractName, 'bin')
+  const abi = getContractData(artifactsDir, contractName, 'abi')
+  const bin = getContractData(artifactsDir, contractName, 'bin')
 
   // instantiate contract
   const contract = new web3.eth.Contract(abi)
@@ -131,7 +131,7 @@ const deploy = async (contractName, contractArgs) => {
  */
 function deployed (web3, contractName, contractAddr) {
   // read abi from path
-  const abi = getContractData(artifacts_dir, contractName, 'abi')
+  const abi = getContractData(artifactsDir, contractName, 'abi')
   // instantiate contract
   return new web3.eth.Contract(abi, contractAddr)
 }
@@ -153,7 +153,7 @@ const execute = async (transaction) => {
  * @param {*} contractAddr
  */
 const getInstance = (contractName, contractAddr) => {
-  const abi = getContractData(artifacts_dir, contractName, 'abi')
+  const abi = getContractData(artifactsDir, contractName, 'abi')
   return new web3.eth.Contract(abi, contractAddr)
 }
 
@@ -161,7 +161,7 @@ const getInstance = (contractName, contractAddr) => {
  * Get account by private key
  */
 const getAccount = () => {
-  const account = web3.eth.accounts.privateKeyToAccount(private_key)
+  const account = web3.eth.accounts.privateKeyToAccount(privateKey)
   return account
 }
 
@@ -178,17 +178,20 @@ const getWeb3 = () => {
  * @param {*} options
  */
 const config = (options) => {
-  (node_address = options.node_address), (artifacts_dir = options.artifacts_dir), (private_key = options.private_key)
+  nodeAddress = options.nodeAddress
+  artifactsDir = options.artifactsDir
+  privateKey = options.privateKey
+
   min_gas_limit = options.min_gas_limit ? options.min_gas_limit : 100000
-  web3 = new Web3(node_address)
-  account = web3.eth.accounts.privateKeyToAccount(private_key)
+  web3 = new Web3(nodeAddress)
+  account = web3.eth.accounts.privateKeyToAccount(privateKey)
 }
 
 const getContractData = (dir, contractName, type) => {
   let contractData = null
   try {
-    // console.log('artifacts_dir + contractName + "." + type', artifacts_dir + contractName + "." + type);
-    contractData = fs.readFileSync(artifacts_dir + contractName + '.' + type, { encoding: 'utf8' })
+    // console.log('artifactsDir + contractName + "." + type', artifactsDir + contractName + "." + type);
+    contractData = fs.readFileSync(artifactsDir + contractName + '.' + type, { encoding: 'utf8' })
     contractData = type === 'abi' ? JSON.parse(contractData) : contractData
     // console.log('contractData', contractData);
   } catch (error) {
@@ -197,7 +200,7 @@ const getContractData = (dir, contractName, type) => {
 
   if (!contractData) {
     try {
-      const contract = fs.readFileSync(artifacts_dir + contractName + '.json', { encoding: 'utf8' })
+      const contract = fs.readFileSync(artifactsDir + contractName + '.json', { encoding: 'utf8' })
       contractData = JSON.parse(contract)[type]
     } catch (error) {
       throw new Error(`Failed to get ${type} for contract ${contractName}`)
