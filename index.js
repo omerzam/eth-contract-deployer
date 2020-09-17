@@ -8,6 +8,7 @@
  */
 
 const fs = require('fs')
+const path = require('path')
 const Web3 = require('web3')
 
 let nodeAddress = ''
@@ -109,7 +110,7 @@ const deploy = async (contractName, contractArgs) => {
   const contract = new web3.eth.Contract(abi)
 
   // prepare object for contract deployment
-  const options = { data: '0x' + bin, arguments: contractArgs }
+  const options = { data: bin, arguments: contractArgs }
 
   // prepare contract deployment transaction
   const transaction = contract.deploy(options)
@@ -179,7 +180,7 @@ const getWeb3 = () => {
  */
 const config = (options) => {
   nodeAddress = options.nodeAddress
-  artifactsDir = options.artifactsDir
+  artifactsDir = path.resolve(options.artifactsDir) + '/'
   privateKey = options.privateKey
 
   min_gas_limit = options.min_gas_limit ? options.min_gas_limit : 100000
@@ -190,18 +191,16 @@ const config = (options) => {
 const getContractData = (dir, contractName, type) => {
   let contractData = null
   try {
-    // console.log('artifactsDir + contractName + "." + type', artifactsDir + contractName + "." + type);
     contractData = fs.readFileSync(artifactsDir + contractName + '.' + type, { encoding: 'utf8' })
     contractData = type === 'abi' ? JSON.parse(contractData) : contractData
-    // console.log('contractData', contractData);
   } catch (error) {
-    console.log(`failed to read ${type} file trying json`)
+    console.log(`failed to read ${type} file, trying json`)
   }
 
   if (!contractData) {
     try {
       const contract = fs.readFileSync(artifactsDir + contractName + '.json', { encoding: 'utf8' })
-      contractData = JSON.parse(contract)[type]
+      contractData = JSON.parse(contract)[type] ? JSON.parse(contract)[type] : JSON.parse(contract).bytecode
     } catch (error) {
       throw new Error(`Failed to get ${type} for contract ${contractName}`)
     }
