@@ -28,7 +28,7 @@
   },
   "homepage": "https://github.com/omerzam/eth-contract-deployer#readme",
   "dependencies": {
-    "web3": "^1.2.11"
+    "web3": "^4.0.1"
   },
   "devDependencies": {
     "standard": "^16.0.3"
